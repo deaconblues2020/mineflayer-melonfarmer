@@ -22,18 +22,13 @@ bot.once('spawn', () => {
     bot.pathfinder.setMovements(defaultMovements) // set the bot's movements to the `Movements` we just created
   })
 
-
+/*
 bot.on('chat', async (username, message) => {
     if (username === bot.username) return
     const target = bot.players[username] ? bot.players[username].entity : null
 
     if (message.startsWith('farm')) {
-      /*const name = message.split(' ')[1]
-      if (bot.registry.blocksByName[name] === undefined) {
-        bot.chat(`${name} is not a block name`)
-        return
-      }
-      console.log("farm " + name);*/
+
       farmLoop() 
     } else  if (message.startsWith('come')) {
       if (!target) {
@@ -47,6 +42,29 @@ bot.on('chat', async (username, message) => {
     } 
   
 })
+*/
+
+bot.on('whisper', (username, message, rawMessage) => {
+  console.log(`I received a message from ${username}: ${message}`)
+  //bot.whisper(username, 'I can tell secrets too.')
+
+  if (message.startsWith('farm')) {
+
+    farmLoop() 
+  } else  if (message.startsWith('come')) {
+    if (!target) {
+      bot.chat('I don\'t see you !')
+      return
+    }
+    const p = target.position
+
+    bot.pathfinder.setMovements(defaultMovements)
+    bot.pathfinder.setGoal(new GoalNear(p.x, p.y, p.z, 1))
+  } 
+
+})
+
+
 
 bot.on('wake', () => {
     bot.chat('Good morning!')
@@ -112,11 +130,11 @@ async function mineBlock(block) {
 function deposit() {
   logInventory()
     const id = [bot.registry.blocksByName["chest"].id]
-    const chestBlock = bot.findBlock({ matching: id })
+    const chestBlock = bot.findBlock({ matching: id, maxDistance: 30 })
   
     if (!chestBlock) {
         console.log("Chest not found. I am giving up.");
-        return;
+        setTimeout(farmLoop, 1000)
     }
     bot.pathfinder.goto(new GoalNear(chestBlock.position.x, chestBlock.position.y, chestBlock.position.z, 1)).then(() => depositInChest(chestBlock));
       
